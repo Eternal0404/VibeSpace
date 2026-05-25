@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain
+        uses: actions/setup-rust@v1
         with:
           rust-version: ${{ matrix.rust }}
 
@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain
+        uses: actions/setup-rust@v1
         with:
           rust-version: '1.92.0'
 
