@@ -1,0 +1,80 @@
+name: Build vibe_swarm crate
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'crates/vibe_swarm/**'
+      - 'Cargo.toml'
+  pull_request:
+    paths:
+      - 'crates/vibe_swarm/**'
+      - 'Cargo.toml'
+
+jobs:
+  build:
+    name: Build vibe_swarm
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: ['1.92.0']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@1
+        with:
+          rust-version: ${{ matrix.rust }}
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build vibe_swarm crate
+        run: cargo build -p vibe_swarm
+        env:
+          CARGO_INCREMENTAL: 0
+
+      - name: Run vibe_swarm tests
+        run: cargo test -p vibe_swarm
+
+      - name: Check vibe_swarm formatting
+        run: |
+          cargo fmt --check --all
+          cargo clippy -p vibe_swarm -- -D warnings 2>/dev/null || true
+
+  style:
+    name: Code style check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@1
+        with:
+          rust-version: '1.92.0'
+
+      - name: Check formatting
+        run: cargo fmt --check -p vibe_swarm
+
+      - name: Run clippy
+        run: cargo clippy -p vibe_swarm -- -D warnings
