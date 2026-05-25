@@ -179,7 +179,7 @@ impl WorkspacePreset {
 
     pub fn add_agent_hub_panel(&mut self, position: PanelPosition) -> &mut PanelConfig {
         let (width, height, x, y) = position.to_dimensions();
-        let mut panel = PanelConfig::new(PanelType::AgentHub, PathBuf::new(), width, height)
+        let panel = PanelConfig::new(PanelType::AgentHub, PathBuf::new(), width, height)
             .with_position(x, y)
             .with_title("Agent Hub".to_string());
 
@@ -306,7 +306,7 @@ impl WorkspacePresetManager {
                 WorkspacePreset::new("Horizontal Split".to_string(), LayoutType::HorizontalSplit)
                     .with_description("Two terminal panels side by side".to_string());
 
-            let mut left = PanelConfig::new(
+            let left = PanelConfig::new(
                 PanelType::Terminal,
                 PathBuf::from("."),
                 0.5,
@@ -315,7 +315,7 @@ impl WorkspacePresetManager {
             .with_position(0.0, 0.0)
             .with_title("Left".to_string());
 
-            let mut right = PanelConfig::new(
+            let right = PanelConfig::new(
                 PanelType::Terminal,
                 PathBuf::from("."),
                 0.5,

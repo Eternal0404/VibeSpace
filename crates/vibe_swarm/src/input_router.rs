@@ -143,7 +143,7 @@ impl InputRouter {
         if trimmed.starts_with('/') {
             let parts: Vec<&str> = trimmed.split_whitespace().collect();
             if let Some(cmd) = parts.first() {
-                if self.command_prefixes.slash_commands.contains(cmd) {
+                if self.command_prefixes.slash_commands.iter().any(|s| s.as_str() == *cmd) {
                     return InputClassification::SlashCommand;
                 }
             }

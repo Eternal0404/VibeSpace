@@ -1,5 +1,4 @@
-use crate::message_bus::{MessageBus, MessageEnvelope, AgentMessage, MessageType, TaskStatus, MessageFilter};
-use crate::workspace_preset::WorkspacePreset;
+use crate::message_bus::{MessageBus, MessageEnvelope, MessageType, TaskStatus};
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -8,7 +7,7 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct AgentId(pub Uuid);
 
 impl AgentId {
@@ -42,6 +41,7 @@ impl Default for AgentConfig {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Agent {
     pub id: AgentId,
     pub config: AgentConfig,
