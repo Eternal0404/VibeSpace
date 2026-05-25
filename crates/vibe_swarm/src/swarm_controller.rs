@@ -90,13 +90,33 @@ impl Default for SwarmController {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", content = "data")]
 pub enum SwarmEvent {
-    AgentJoined { agent_id: AgentId },
-    AgentLeft { agent_id: AgentId },
-    TaskAssigned { agent_id: AgentId, task_id: Uuid },
-    TaskCompleted { agent_id: AgentId, task_id: Uuid },
-    TaskFailed { agent_id: AgentId, task_id: Uuid, error: String },
-    MessageSent { from: AgentId, to: Option<AgentId>, message_id: Uuid },
-    SwarmStarted { agent_count: usize },
+    AgentJoined {
+        agent_id: AgentId,
+    },
+    AgentLeft {
+        agent_id: AgentId,
+    },
+    TaskAssigned {
+        agent_id: AgentId,
+        task_id: Uuid,
+    },
+    TaskCompleted {
+        agent_id: AgentId,
+        task_id: Uuid,
+    },
+    TaskFailed {
+        agent_id: AgentId,
+        task_id: Uuid,
+        error: String,
+    },
+    MessageSent {
+        from: AgentId,
+        to: Option<AgentId>,
+        message_id: Uuid,
+    },
+    SwarmStarted {
+        agent_count: usize,
+    },
     SwarmStopped,
 }
 
@@ -140,7 +160,11 @@ impl SwarmController {
         Ok(id)
     }
 
-    pub fn spawn_agents(&self, count: usize, base_config: AgentConfig) -> Result<Vec<AgentId>, SwarmError> {
+    pub fn spawn_agents(
+        &self,
+        count: usize,
+        base_config: AgentConfig,
+    ) -> Result<Vec<AgentId>, SwarmError> {
         let mut ids = Vec::with_capacity(count);
 
         for i in 0..count {
@@ -158,7 +182,9 @@ impl SwarmController {
             }
         }
 
-        self.emit_event(SwarmEvent::SwarmStarted { agent_count: ids.len() });
+        self.emit_event(SwarmEvent::SwarmStarted {
+            agent_count: ids.len(),
+        });
         Ok(ids)
     }
 
@@ -229,7 +255,12 @@ impl SwarmController {
         Ok(())
     }
 
-    pub fn fail_task(&self, agent_id: AgentId, task_id: Uuid, error: String) -> Result<(), SwarmError> {
+    pub fn fail_task(
+        &self,
+        agent_id: AgentId,
+        task_id: Uuid,
+        error: String,
+    ) -> Result<(), SwarmError> {
         let mut agents = self.agents.write();
 
         let agent = agents
@@ -242,7 +273,11 @@ impl SwarmController {
             agent.status = AgentStatus::Idle;
         }
 
-        self.emit_event(SwarmEvent::TaskFailed { agent_id, task_id, error });
+        self.emit_event(SwarmEvent::TaskFailed {
+            agent_id,
+            task_id,
+            error,
+        });
 
         Ok(())
     }
@@ -263,7 +298,11 @@ impl SwarmController {
         let message_id = envelope.id;
         self.message_bus.send_direct(envelope, message_type);
 
-        self.emit_event(SwarmEvent::MessageSent { from, to, message_id });
+        self.emit_event(SwarmEvent::MessageSent {
+            from,
+            to,
+            message_id,
+        });
 
         Ok(message_id)
     }
@@ -286,7 +325,12 @@ impl SwarmController {
         drop(agents);
 
         let payload = serde_json::to_value(&subtask).unwrap_or(serde_json::json!({}));
-        self.send_message(from_agent, Some(to_agent), payload, MessageType::TaskDelegation)
+        self.send_message(
+            from_agent,
+            Some(to_agent),
+            payload,
+            MessageType::TaskDelegation,
+        )
     }
 
     pub fn request_peer_review(
@@ -296,7 +340,12 @@ impl SwarmController {
         review_request: PeerReviewRequest,
     ) -> Result<Uuid, SwarmError> {
         let payload = serde_json::to_value(&review_request).unwrap_or(serde_json::json!({}));
-        self.send_message(from_agent, Some(target_agent), payload, MessageType::PeerReview)
+        self.send_message(
+            from_agent,
+            Some(target_agent),
+            payload,
+            MessageType::PeerReview,
+        )
     }
 
     pub fn share_context(
@@ -315,6 +364,7 @@ impl SwarmController {
     }
 
     pub fn wait_for_completion(&self, task_ids: &[Uuid], timeout: Duration) -> Vec<TaskResult> {
+        #[cfg(not(target_arch = "wasm32"))]
         let start = std::time::Instant::now();
         let mut results = Vec::new();
 

@@ -1,4 +1,4 @@
-use crate::swarm_controller::{SwarmController, AgentId};
+use crate::swarm_controller::{AgentId, SwarmController};
 use crate::workspace_preset::WorkspacePresetManager;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
@@ -143,7 +143,12 @@ impl InputRouter {
         if trimmed.starts_with('/') {
             let parts: Vec<&str> = trimmed.split_whitespace().collect();
             if let Some(cmd) = parts.first() {
-                if self.command_prefixes.slash_commands.iter().any(|s| s.as_str() == *cmd) {
+                if self
+                    .command_prefixes
+                    .slash_commands
+                    .iter()
+                    .any(|s| s.as_str() == *cmd)
+                {
                     return InputClassification::SlashCommand;
                 }
             }
@@ -243,7 +248,8 @@ impl InputRouter {
             }
         }
 
-        if input.contains('|') || input.contains('>') || input.contains('<') || input.contains('&') {
+        if input.contains('|') || input.contains('>') || input.contains('<') || input.contains('&')
+        {
             return true;
         }
 
@@ -283,17 +289,11 @@ impl InputRouter {
                 }
             }
 
-            InputClassification::SwarmCommand => {
-                self.handle_swarm_command(input)
-            }
+            InputClassification::SwarmCommand => self.handle_swarm_command(input),
 
-            InputClassification::WorkspaceCommand => {
-                self.handle_workspace_command(input)
-            }
+            InputClassification::WorkspaceCommand => self.handle_workspace_command(input),
 
-            InputClassification::SlashCommand => {
-                self.handle_slash_command(input)
-            }
+            InputClassification::SlashCommand => self.handle_slash_command(input),
         }
     }
 
@@ -324,10 +324,7 @@ impl InputRouter {
             let mut found = false;
             for prefix in &self.command_prefixes.swarm_prefixes {
                 if trimmed.starts_with(prefix) {
-                    let stripped = trimmed
-                        .strip_prefix(prefix)
-                        .unwrap_or(trimmed)
-                        .trim();
+                    let stripped = trimmed.strip_prefix(prefix).unwrap_or(trimmed).trim();
                     result_vec = stripped.split_whitespace().collect();
                     found = true;
                     break;
@@ -354,12 +351,15 @@ impl InputRouter {
         }
 
         let subcommand = command_parts[0].to_lowercase();
-        let args: Vec<&str> = command_parts[1..].iter().copied().collect();
+        let args: Vec<&str> = command_parts[1..].to_vec();
         let args_str = args.join(" ");
 
         match subcommand.as_str() {
             "spawn" => {
-                let count = args.first().and_then(|s| s.parse::<usize>().ok()).unwrap_or(1);
+                let count = args
+                    .first()
+                    .and_then(|s| s.parse::<usize>().ok())
+                    .unwrap_or(1);
                 RoutingDecision {
                     classification: InputClassification::SwarmCommand,
                     execute_as_shell: false,
@@ -385,19 +385,17 @@ impl InputRouter {
                 workspace_command: None,
             },
 
-            "delegate" => {
-                RoutingDecision {
-                    classification: InputClassification::SwarmCommand,
-                    execute_as_shell: false,
-                    route_to_agent: self.default_agent_id,
-                    agent_message: Some(AgentMessagePayload {
-                        message: format!("[DELEGATE] {}", args_str),
-                        context_files: Vec::new(),
-                        flags: vec!["delegate".to_string()],
-                    }),
-                    workspace_command: None,
-                }
-            }
+            "delegate" => RoutingDecision {
+                classification: InputClassification::SwarmCommand,
+                execute_as_shell: false,
+                route_to_agent: self.default_agent_id,
+                agent_message: Some(AgentMessagePayload {
+                    message: format!("[DELEGATE] {}", args_str),
+                    context_files: Vec::new(),
+                    flags: vec!["delegate".to_string()],
+                }),
+                workspace_command: None,
+            },
 
             "broadcast" => RoutingDecision {
                 classification: InputClassification::SwarmCommand,
@@ -563,18 +561,36 @@ mod tests {
         let router = create_test_router();
 
         assert_eq!(router.classify("ls -la"), InputClassification::ShellCommand);
-        assert_eq!(router.classify("cd /home"), InputClassification::ShellCommand);
-        assert_eq!(router.classify("git status"), InputClassification::ShellCommand);
-        assert_eq!(router.classify("npm install"), InputClassification::ShellCommand);
+        assert_eq!(
+            router.classify("cd /home"),
+            InputClassification::ShellCommand
+        );
+        assert_eq!(
+            router.classify("git status"),
+            InputClassification::ShellCommand
+        );
+        assert_eq!(
+            router.classify("npm install"),
+            InputClassification::ShellCommand
+        );
     }
 
     #[test]
     fn test_natural_language_detection() {
         let router = create_test_router();
 
-        assert_eq!(router.classify("What files are in this directory?"), InputClassification::NaturalLanguage);
-        assert_eq!(router.classify("Explain this code"), InputClassification::NaturalLanguage);
-        assert_eq!(router.classify("How do I fix this bug?"), InputClassification::NaturalLanguage);
+        assert_eq!(
+            router.classify("What files are in this directory?"),
+            InputClassification::NaturalLanguage
+        );
+        assert_eq!(
+            router.classify("Explain this code"),
+            InputClassification::NaturalLanguage
+        );
+        assert_eq!(
+            router.classify("How do I fix this bug?"),
+            InputClassification::NaturalLanguage
+        );
     }
 
     #[test]
@@ -584,7 +600,11 @@ mod tests {
         let decision = router.route("@agent explain this function");
         assert!(!decision.execute_as_shell);
         assert!(decision.agent_message.is_some());
-        assert!(decision.agent_message.unwrap().message.contains("explain this function"));
+        assert!(decision
+            .agent_message
+            .unwrap()
+            .message
+            .contains("explain this function"));
     }
 
     #[test]
@@ -592,11 +612,17 @@ mod tests {
         let router = create_test_router();
 
         let decision = router.route("/workspace load fullstack");
-        assert_eq!(decision.classification, InputClassification::WorkspaceCommand);
+        assert_eq!(
+            decision.classification,
+            InputClassification::WorkspaceCommand
+        );
         assert!(decision.workspace_command.is_some());
 
         let decision = router.route("/preset list");
-        assert_eq!(decision.classification, InputClassification::WorkspaceCommand);
+        assert_eq!(
+            decision.classification,
+            InputClassification::WorkspaceCommand
+        );
     }
 
     #[test]

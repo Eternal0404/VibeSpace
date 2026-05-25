@@ -1,10 +1,10 @@
 use crate::swarm_controller::AgentId;
+use chrono::{DateTime, Utc};
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum TaskStatus {
@@ -17,7 +17,10 @@ pub enum TaskStatus {
 
 impl TaskStatus {
     pub fn is_terminal(&self) -> bool {
-        matches!(self, TaskStatus::Complete | TaskStatus::Error | TaskStatus::Cancelled)
+        matches!(
+            self,
+            TaskStatus::Complete | TaskStatus::Error | TaskStatus::Cancelled
+        )
     }
 }
 
@@ -33,11 +36,7 @@ pub struct MessageEnvelope {
 }
 
 impl MessageEnvelope {
-    pub fn new(
-        sender_id: AgentId,
-        target_id: Option<AgentId>,
-        payload: serde_json::Value,
-    ) -> Self {
+    pub fn new(sender_id: AgentId, target_id: Option<AgentId>, payload: serde_json::Value) -> Self {
         Self {
             id: Uuid::new_v4(),
             sender_id,
@@ -177,7 +176,12 @@ impl MessageBus {
         self.publish(message);
     }
 
-    pub fn broadcast(&self, sender_id: AgentId, payload: serde_json::Value, message_type: MessageType) {
+    pub fn broadcast(
+        &self,
+        sender_id: AgentId,
+        payload: serde_json::Value,
+        message_type: MessageType,
+    ) {
         let envelope = MessageEnvelope::broadcast(sender_id, payload);
         let message = AgentMessage {
             envelope,
@@ -186,14 +190,16 @@ impl MessageBus {
         self.publish(message);
     }
 
-    pub fn reply_to(&self, original: &MessageEnvelope, payload: serde_json::Value, status: TaskStatus, message_type: MessageType) {
-        let envelope = MessageEnvelope::new(
-            original.sender_id,
-            Some(original.sender_id),
-            payload,
-        )
-        .with_status(status)
-        .with_reply_to(original.id);
+    pub fn reply_to(
+        &self,
+        original: &MessageEnvelope,
+        payload: serde_json::Value,
+        status: TaskStatus,
+        message_type: MessageType,
+    ) {
+        let envelope = MessageEnvelope::new(original.sender_id, Some(original.sender_id), payload)
+            .with_status(status)
+            .with_reply_to(original.id);
 
         let message = AgentMessage {
             envelope,
@@ -210,7 +216,11 @@ impl MessageBus {
         }
     }
 
-    pub fn get_messages_for_agent(&self, agent_id: &AgentId, limit: Option<usize>) -> Vec<AgentMessage> {
+    pub fn get_messages_for_agent(
+        &self,
+        agent_id: &AgentId,
+        limit: Option<usize>,
+    ) -> Vec<AgentMessage> {
         let history = self.message_history.read();
         let messages: Vec<AgentMessage> = history
             .iter()
@@ -274,7 +284,8 @@ mod tests {
     #[test]
     fn test_broadcast() {
         let agent_id = AgentId::new();
-        let envelope = MessageEnvelope::broadcast(agent_id, serde_json::json!({"type": "announcement"}));
+        let envelope =
+            MessageEnvelope::broadcast(agent_id, serde_json::json!({"type": "announcement"}));
 
         assert_eq!(envelope.sender_id, agent_id);
         assert!(envelope.target_id.is_none());

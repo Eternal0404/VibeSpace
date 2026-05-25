@@ -296,8 +296,9 @@ impl WorkspacePresetManager {
     }
 
     fn register_default_presets(&mut self) {
-        let single_terminal = WorkspacePreset::new("Single Terminal".to_string(), LayoutType::Single)
-            .with_description("A single terminal panel".to_string());
+        let single_terminal =
+            WorkspacePreset::new("Single Terminal".to_string(), LayoutType::Single)
+                .with_description("A single terminal panel".to_string());
         self.default_presets
             .insert("single".to_string(), single_terminal);
 
@@ -306,23 +307,13 @@ impl WorkspacePresetManager {
                 WorkspacePreset::new("Horizontal Split".to_string(), LayoutType::HorizontalSplit)
                     .with_description("Two terminal panels side by side".to_string());
 
-            let left = PanelConfig::new(
-                PanelType::Terminal,
-                PathBuf::from("."),
-                0.5,
-                1.0,
-            )
-            .with_position(0.0, 0.0)
-            .with_title("Left".to_string());
+            let left = PanelConfig::new(PanelType::Terminal, PathBuf::from("."), 0.5, 1.0)
+                .with_position(0.0, 0.0)
+                .with_title("Left".to_string());
 
-            let right = PanelConfig::new(
-                PanelType::Terminal,
-                PathBuf::from("."),
-                0.5,
-                1.0,
-            )
-            .with_position(0.5, 0.0)
-            .with_title("Right".to_string());
+            let right = PanelConfig::new(PanelType::Terminal, PathBuf::from("."), 0.5, 1.0)
+                .with_position(0.5, 0.0)
+                .with_title("Right".to_string());
 
             preset.panels.push(left);
             preset.panels.push(right);
@@ -336,28 +327,21 @@ impl WorkspacePresetManager {
             let mut preset = WorkspacePreset::new("Fullstack".to_string(), LayoutType::Grid)
                 .with_description("Frontend, backend, and agent panels".to_string());
 
-            let editor = PanelConfig::new(
-                PanelType::Editor,
-                PathBuf::from("./src"),
-                0.5,
-                0.6,
-            )
-            .with_position(0.0, 0.0)
-            .with_title("Editor".to_string());
+            let editor = PanelConfig::new(PanelType::Editor, PathBuf::from("./src"), 0.5, 0.6)
+                .with_position(0.0, 0.0)
+                .with_title("Editor".to_string());
 
-            let terminal = PanelConfig::new(
-                PanelType::Terminal,
-                PathBuf::from("."),
-                0.5,
-                0.4,
-            )
-            .with_position(0.5, 0.0)
-            .with_title("Terminal".to_string());
+            let terminal = PanelConfig::new(PanelType::Terminal, PathBuf::from("."), 0.5, 0.4)
+                .with_position(0.5, 0.0)
+                .with_title("Terminal".to_string());
 
             let preview = PanelConfig::new(PanelType::Preview, PathBuf::new(), 0.5, 0.4)
                 .with_position(0.5, 0.4)
                 .with_title("Preview".to_string())
-                .with_metadata("url".to_string(), serde_json::json!("http://localhost:3000"));
+                .with_metadata(
+                    "url".to_string(),
+                    serde_json::json!("http://localhost:3000"),
+                );
 
             let agent_hub = PanelConfig::new(PanelType::AgentHub, PathBuf::new(), 0.5, 0.4)
                 .with_position(0.0, 0.6)
@@ -377,14 +361,9 @@ impl WorkspacePresetManager {
                 WorkspacePreset::new("Agent Workspace".to_string(), LayoutType::VerticalSplit)
                     .with_description("Multi-agent collaboration workspace".to_string());
 
-            let main_terminal = PanelConfig::new(
-                PanelType::Terminal,
-                PathBuf::from("."),
-                1.0,
-                0.4,
-            )
-            .with_position(0.0, 0.0)
-            .with_title("Main Terminal".to_string());
+            let main_terminal = PanelConfig::new(PanelType::Terminal, PathBuf::from("."), 1.0, 0.4)
+                .with_position(0.0, 0.0)
+                .with_title("Main Terminal".to_string());
 
             let agent_hub = PanelConfig::new(PanelType::AgentHub, PathBuf::new(), 1.0, 0.4)
                 .with_position(0.0, 0.4)
@@ -439,8 +418,7 @@ impl WorkspacePresetManager {
     }
 
     pub fn get_active_preset(&self) -> Option<WorkspacePreset> {
-        self.active_preset_id
-            .and_then(|id| self.get_preset(&id))
+        self.active_preset_id.and_then(|id| self.get_preset(&id))
     }
 
     pub fn create_from_current_state(
@@ -530,14 +508,9 @@ mod tests {
 
     #[test]
     fn test_panel_config() {
-        let panel = PanelConfig::new(
-            PanelType::Terminal,
-            PathBuf::from("/home/user"),
-            0.5,
-            1.0,
-        )
-        .with_shell(ShellType::Zsh)
-        .with_position(0.5, 0.0);
+        let panel = PanelConfig::new(PanelType::Terminal, PathBuf::from("/home/user"), 0.5, 1.0)
+            .with_shell(ShellType::Zsh)
+            .with_position(0.5, 0.0);
 
         assert_eq!(panel.panel_type, PanelType::Terminal);
         assert_eq!(panel.shell_type, Some(ShellType::Zsh));
