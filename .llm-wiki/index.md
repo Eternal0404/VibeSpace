@@ -59,6 +59,7 @@ images/          # Brand assets
 | `CONTRIBUTING.md` | Oz agent workflow | Reference |
 | `TERAX.md` | Architecture doc for Terex (reference) | Reference |
 | `ROADMAP.md` | Planned features (terax) | Reference |
+| `PROJECT_HANDOVER.md` | VibeSwarm crate handoff for next AI | **Required** |
 
 ## Crate Categories
 
@@ -75,6 +76,7 @@ images/          # Brand assets
 - `computer_use` — Computer use for agents
 - `warp_ripgrep` — Codebase search integration
 - `mcp` — Model Context Protocol
+- `vibe_swarm` — Multi-agent swarm orchestration (new)
 
 ### Networking
 - `graphql` — Cynic-based GraphQL client
@@ -126,7 +128,7 @@ cargo run --features with_local_server
 
 | Category | Pages |
 |----------|-------|
-| entities | crates-index, warpui-architecture, warp-terminal-crate, ai-crate, graphql-crate, persistence-crate |
+| entities | crates-index, warpui-architecture, warp-terminal-crate, ai-crate, graphql-crate, persistence-crate, vibe_swarm-crate |
 | concepts | warpui-pattern, terminal-locking, feature-flags, ai-agent-system, warp-drive-cloud-sync, workflows-oz-agent |
 | source | warp-md, contributing-md, specs-overview, command-signatures, skills-lock |
 
