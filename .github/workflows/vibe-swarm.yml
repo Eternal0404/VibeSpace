@@ -6,10 +6,12 @@ on:
     paths:
       - 'crates/vibe_swarm/**'
       - 'Cargo.toml'
+      - '.github/workflows/vibe-swarm.yml'
   pull_request:
     paths:
       - 'crates/vibe_swarm/**'
       - 'Cargo.toml'
+      - '.github/workflows/vibe-swarm.yml'
 
 jobs:
   build:
